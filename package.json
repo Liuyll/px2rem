@@ -1,0 +1,8 @@
+{
+  "name": "babel-plugin-px2rem",
+  "version": "1.0.0",
+  "description": "a plugin to adapter px to rem in rn-plus",
+  "main": "index.js",
+  "author": "youngboyliu",
+  "license": "ISC"
+}
