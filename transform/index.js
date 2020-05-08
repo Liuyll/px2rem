@@ -13,6 +13,7 @@ const TRANSFORM_PROP_NO_SET = [
     'perspective'
 ];
 
+// 匹配translateX(1)里的参数
 const match = new RegExp(/(?<=\().*?(?=\))/);
 function handleObject(obj, unit) {
     for (const k in obj) {

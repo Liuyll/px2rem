@@ -1,5 +1,22 @@
 /* eslint-disable */
 
+/**
+ * 用与测试插件是否生效,不要在生产环境使用
+ * @param {} path Program Path
+ */
+function enEffect(path,t) {
+    const co = t.ExpressionStatement(
+        t.CallExpression(
+            t.MemberExpression(
+                t.Identifier('console'),
+                t.Identifier('log')
+            ),
+            [t.Identifier('123')]
+        )
+    )
+    path.node.body.unshift(co)
+}
+
 module.exports = (babel) => {
     const { types: t } = babel;
 
@@ -37,23 +54,6 @@ module.exports = (babel) => {
         )
     }
 
-    /**
-     * 用与测试插件是否生效,不要在生产环境使用
-     * @param {} path Program Path
-     */
-    function enEffect(path) {
-        const co = t.ExpressionStatement(
-            t.CallExpression(
-                t.MemberExpression(
-                    t.Identifier('console'),
-                    t.Identifier('log')
-                ),
-                [t.Identifier('123')]
-            )
-        )
-        path.node.body.unshift(co)
-    }
-
     function createTransformCallExpression(argExp,customNoTransforms) {
 
         const call = t.callExpression(
@@ -72,15 +72,16 @@ module.exports = (babel) => {
     }
 
     return {
-        name: 'babel-plugin-px2rem',
+        name: 'babel-plugin-rnplus-px2rem',
     	visitor: {
           	Program(path) {
             	const addedImport = t.ImportDeclaration(
-                	[t.ImportDefaultSpecifier(t.Identifier('__d_'))],
-                  	t.StringLiteral('px2rem/transform')
+                    [t.ImportDefaultSpecifier(t.Identifier('__d_'))],
+                    // 理论上来说,这个名字应该由用户配置更加方便扩展
+                  	t.StringLiteral('@tencent/babel-plugin-rnplus-px2rem/transform')
                 );
 
-                // enEffect(path)
+                // enEffect(path,t)
                 path.node.body.unshift(addedImport);
             },
             ImportSpecifier(path) {
@@ -98,7 +99,7 @@ module.exports = (babel) => {
 
                             customNoTransformSet = noSet
                         } catch(e) {
-                            throw new Error('@babel/plugin-px2rem option:noTransform only accept array stringliteral')
+                            throw new Error('babel-plugin-px2rem option:noTransform only accept array stringliteral')
                         }
                     }
                     else customNoTransformSet = []
@@ -111,6 +112,7 @@ module.exports = (babel) => {
                 if(!checkIsSS(path)) return 
                 let topScope = findVariableTopScope(path,ssName)
 
+                // 判断ss是否是引用react-native
                 if(topScope === topPath.scope) {
                     let curArgs = path.node.arguments[0]
                     
