@@ -25,6 +25,12 @@ module.exports = (babel) => {
     let customNoTransformSet
 
     let transformUnit
+    
+    /**
+     * 是否初次处理用户配置
+     */
+    let isHandleCustomNOTransformSet = false
+
     function checkIsSS(cePath) {
         if(t.isMemberExpression(cePath.node.callee)) {
           const { object, property } = cePath.node.callee 
@@ -54,8 +60,7 @@ module.exports = (babel) => {
         )
     }
 
-    function createTransformCallExpression(argExp,customNoTransforms) {
-
+    function createTransformCallExpression(argExp) {
         const call = t.callExpression(
             t.Identifier('__d_'),
             [
@@ -63,11 +68,13 @@ module.exports = (babel) => {
                 t.Identifier(
                     String(transformUnit)
                 ),
-                t.ArrayExpression(
+                !isHandleCustomNOTransformSet ? t.ArrayExpression(
                     customNoTransformSet.map(r => t.StringLiteral(r))
-                )
+                ) : t.nullLiteral()
             ]
         );
+
+        if(isHandleCustomNOTransformSet) isHandleCustomNOTransformSet = true
         return call
     }
 
@@ -99,7 +106,10 @@ module.exports = (babel) => {
 
                             customNoTransformSet = noSet
                         } catch(e) {
-                            throw new Error('babel-plugin-px2rem option:noTransform only accept array stringliteral')
+                            throw new Error(`
+                                babel-plugin-px2rem option:noTransform only accept array stringliteral
+                                like this: "[\"fontSize,height\"]"
+                            `)
                         }
                     }
                     else customNoTransformSet = []

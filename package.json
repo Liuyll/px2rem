@@ -1,9 +1,10 @@
 {
   "name": "@tencent/babel-plugin-rnplus-px2rem",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "a plugin to adapter px to rem in rn-plus",
-  "repository":"http://git.code.oa.com/rn-plus/rn-plus-px2rem.git",
+  "repository": "http://git.code.oa.com/rn-plus/rn-plus-px2rem.git",
   "main": "index.js",
   "author": "youngboyliu",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {}
 }
