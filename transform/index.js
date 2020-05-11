@@ -1,26 +1,14 @@
 import { Platform } from 'react-native';
 
-const hasSet = typeof Set === 'function';
-
-const NO_TRANSFORM_SET = typeof Set === 'function'
-    ? new Set([
-        'flex',
-        'opacity',
-        'fontWeight',
-        'scaleX',
-        'scaleY',
-        'scale',
-        'perspective'
-    ])
-    : Array([
-        'flex',
-        'opacity',
-        'fontWeight',
-        'scaleX',
-        'scaleY',
-        'scale',
-        'perspective'
-    ]);
+const NO_TRANSFORM_SET = Array([
+    'flex',
+    'opacity',
+    'fontWeight',
+    'scaleX',
+    'scaleY',
+    'scale',
+    'perspective'
+]);
 
 /**
  * 该match匹配`transform:"translateX()"`的参数
@@ -40,9 +28,7 @@ function handleObject(obj, unit) {
             handleObject(v, unit);
         }
 
-        if (hasSet) {
-            if (NO_TRANSFORM_SET.has(k)) continue;
-        } else if (!~NO_TRANSFORM_SET.indexOf(k)) continue;
+        if (!~NO_TRANSFORM_SET.indexOf(k)) continue;
 
         if (typeof v === 'number') obj[k] = (unit * v) + 'rem';
     }
@@ -53,7 +39,7 @@ function handleObject(obj, unit) {
  * @param {*} noSet 用户提供的不包含在转换列表的属性
  */
 export default function transform(styles, unit = 1 / 37.5, noSet) {
-    if (noSet) noSet.forEach(v => hasSet ? NO_TRANSFORM_SET.add(v) : NO_TRANSFORM_SET.push(v));
+    if (noSet) noSet.forEach(v => NO_TRANSFORM_SET.push(v));
 
     if (Platform.OS === 'web') {
         const transformUnit = unit || 1 / 37.5;
