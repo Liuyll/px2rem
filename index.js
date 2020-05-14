@@ -17,6 +17,14 @@ function enEffect(path,t) {
     path.node.body.unshift(co)
 }
 
+// TODO: 普通变量无法更改
+/**
+ * 是否初次处理用户配置
+ */
+let configs = {
+    isHandleCustomNOTransformSet : false
+}
+
 module.exports = (babel) => {
     const { types: t } = babel;
 
@@ -26,10 +34,6 @@ module.exports = (babel) => {
 
     let transformUnit
     
-    /**
-     * 是否初次处理用户配置
-     */
-    let isHandleCustomNOTransformSet = false
 
     function checkIsSS(cePath) {
         if(t.isMemberExpression(cePath.node.callee)) {
@@ -68,16 +72,39 @@ module.exports = (babel) => {
                 t.Identifier(
                     String(transformUnit)
                 ),
-                !isHandleCustomNOTransformSet ? t.ArrayExpression(
+                !configs.isHandleCustomNOTransformSet ? t.ArrayExpression(
                     customNoTransformSet.map(r => t.StringLiteral(r))
                 ) : t.nullLiteral()
             ]
         );
 
-        if(isHandleCustomNOTransformSet) isHandleCustomNOTransformSet = true
+        if(!configs.isHandleCustomNOTransformSet) configs.isHandleCustomNOTransformSet = true
         return call
     }
+	
+  	/**
+    	{a:1} 
+        ---------transform--------
+        {
+        	style: {
+            	a:1
+            }
+        }
+    */
+  	function createStyleWrapExp(inner) {
+      	let wrap = t.objectProperty(
+        	t.StringLiteral('__inner'),
+          	inner
+        )
+    	let result = t.objectExpression(
+        	[
+            	wrap
+            ]
+        )
 
+        return result
+    }
+    
     return {
         name: 'babel-plugin-rnplus-px2rem',
     	visitor: {
@@ -94,6 +121,19 @@ module.exports = (babel) => {
             ImportSpecifier(path) {
                 if(path.node.imported.name === 'StyleSheet') {
                   ssName = path.node.local.name           	
+                }
+            },
+          	JSXAttribute(path) {
+              	let value
+            	if(t.isJSXIdentifier(path.get('name')) && path.node.name.name === 'style') {
+                	if(t.isJSXExpressionContainer((value = path.get('value')))) {
+                      	let exp
+                    	if(t.isObjectExpression((exp = value.get('expression')))) {
+                        	// let wrapStyle = createStyleWrapExp(exp.node)
+                            const realStyleExp = createTransformCallExpression(exp.node)
+                            exp.replaceWith(realStyleExp)
+                        }
+                    }
                 }
             },
         	CallExpression(path,state) {

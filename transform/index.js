@@ -1,13 +1,14 @@
 import { Platform } from 'react-native';
 
-const NO_TRANSFORM_SET = Array([
+const NO_TRANSFORM_SET = Array.from([
     'flex',
     'opacity',
     'fontWeight',
     'scaleX',
     'scaleY',
     'scale',
-    'perspective'
+    'perspective',
+    'zIndex'
 ]);
 
 /**
@@ -28,9 +29,16 @@ function handleObject(obj, unit) {
             handleObject(v, unit);
         }
 
-        if (!~NO_TRANSFORM_SET.indexOf(k)) continue;
+        if (~NO_TRANSFORM_SET.indexOf(k)) continue;
 
         if (typeof v === 'number') obj[k] = (unit * v) + 'rem';
+        else if (
+            typeof v === 'string' &&
+            !isNaN(+v)
+        ) {
+            const av = Number.parseFloat(v);
+            obj[k] = (unit * av) + 'rem';
+        }
     }
 }
 
@@ -39,8 +47,13 @@ function handleObject(obj, unit) {
  * @param {*} noSet 用户提供的不包含在转换列表的属性
  */
 export default function transform(styles, unit = 1 / 37.5, noSet) {
-    if (noSet) noSet.forEach(v => NO_TRANSFORM_SET.push(v));
+    if (noSet) noSet.forEach(v => {
+        if (~NO_TRANSFORM_SET.indexOf(v)) return;
 
+        NO_TRANSFORM_SET.push(v);
+    });
+
+    console.log(NO_TRANSFORM_SET);
     if (Platform.OS === 'web') {
         const transformUnit = unit || 1 / 37.5;
         if (Object.prototype.toString.call(styles) !== '[object Object]') {
