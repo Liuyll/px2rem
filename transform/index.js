@@ -53,7 +53,6 @@ export default function transform(styles, unit = 1 / 37.5, noSet) {
         NO_TRANSFORM_SET.push(v);
     });
 
-    console.log(NO_TRANSFORM_SET);
     if (Platform.OS === 'web') {
         const transformUnit = unit || 1 / 37.5;
         if (Object.prototype.toString.call(styles) !== '[object Object]') {
