@@ -123,7 +123,9 @@ module.exports = (babel) => {
                   ssName = path.node.local.name           	
                 }
             },
-          	JSXAttribute(path) {
+          	JSXAttribute(path,{inlineTransform=false}) {
+                if(inlineTransform) return
+                
               	let value
             	if(t.isJSXIdentifier(path.get('name')) && path.node.name.name === 'style') {
                 	if(t.isJSXExpressionContainer((value = path.get('value')))) {

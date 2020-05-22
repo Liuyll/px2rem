@@ -30,13 +30,20 @@ function handleObject(obj, unit) {
         }
 
         if (~NO_TRANSFORM_SET.indexOf(k)) continue;
+        if (k.endsWith('!')) return
 
-        if (typeof v === 'number') obj[k] = (unit * v) + 'rem';
+        if (typeof v === 'number') {
+            if(v === 0) return;
+            obj[k] = (unit * v) + 'rem';
+        }
+
         else if (
             typeof v === 'string' &&
             !isNaN(+v)
         ) {
             const av = Number.parseFloat(v);
+            if(av === 0) return;
+
             obj[k] = (unit * av) + 'rem';
         }
     }
