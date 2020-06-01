@@ -112,7 +112,7 @@ module.exports = (babel) => {
             	const addedImport = t.ImportDeclaration(
                     [t.ImportDefaultSpecifier(t.Identifier('__d_'))],
                     // 理论上来说,这个名字应该由用户配置更加方便扩展
-                  	t.StringLiteral('@tencent/babel-plugin-rnplus-px2rem/transform')
+                  	t.StringLiteral('@tencent/babel-plugin-rnplus-px2rem/lib/transform')
                 );
 
                 // enEffect(path,t)
