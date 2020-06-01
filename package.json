@@ -3,8 +3,17 @@
   "version": "1.0.5",
   "description": "a plugin to adapter px to rem in rn-plus",
   "repository": "http://git.code.oa.com/rn-plus/rn-plus-px2rem.git",
-  "main": "index.js",
+  "main": "lib/index.js",
   "author": "youngboyliu",
   "license": "ISC",
-  "dependencies": {}
+  "scripts": {
+    "build": "babel src -d lib --copy-files",
+    "prepublish": "npm run build"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@babel/cli": "^7.10.1",
+    "@babel/core": "^7.10.2",
+    "@babel/preset-env": "^7.10.2"
+  }
 }
