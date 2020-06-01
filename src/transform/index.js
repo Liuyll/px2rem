@@ -31,10 +31,10 @@ function handleObject(obj, unit) {
         }
 
         if (~NO_TRANSFORM_SET.indexOf(k)) continue;
-        if (k.endsWith('!')) return
+        if (k.endsWith('!')) continue
 
         if (typeof v === 'number') {
-            if(v === 0) return;
+            if(v === 0) continue;
             obj[k] = (unit * v) + 'rem';
         }
 
@@ -43,7 +43,7 @@ function handleObject(obj, unit) {
             !isNaN(+v)
         ) {
             const av = Number.parseFloat(v);
-            if(av === 0) return;
+            if(av === 0) continue;
 
             obj[k] = (unit * av) + 'rem';
         }
