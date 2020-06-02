@@ -28,7 +28,7 @@ let configs = {
 module.exports = (babel) => {
     const { types: t } = babel;
 
-    let isInsert = false
+    let isInsertMap = {}
     let topPath
     let ssName 
     let customNoTransformSet
@@ -122,40 +122,44 @@ module.exports = (babel) => {
         return addedImport
     }
 
-    function insertTransformImportAfterSSImport(path) {
-        if(isInsert) return
+    function insertTransformImportAfterSSImport(path,filename) {
+        if(isInsertMap[filename]) return
         if(!path.parentPath) throw new Error('path is not ImportSpecifier')
         const addedImport = buildTransformImport()
         const faPath = path.parentPath
         faPath.insertAfter(addedImport)
 
-        isInsert = true
+        isInsertMap[filename] = true
     }
 
-    function insertTransformImportOnTop(path) {
-        if(isInsert) return
+    function insertTransformImportOnTop(path,filename) {
+        if(isInsertMap[filename]) return
         if(!topPath) topPath = getProgram(path)
 
         topPath.node.body.unshift(buildTransformImport())
-        isInsert = true
+        isInsertMap[filename] = true
 
     }
 
     return {
         name: 'babel-plugin-rnplus-px2rem',
     	visitor: {
-            ImportSpecifier(path) {
+            ImportSpecifier(path,state) {
                 if(path.node.imported.name === 'StyleSheet') {
+                  let filename = state.file.opts.filename
                   ssName = path.node.local.name
-                  insertTransformImportAfterSSImport(path)         	
+                  insertTransformImportAfterSSImport(path,filename)         	
                 }
             },
-          	JSXAttribute(path,{inlineTransform=false}) {
+          	JSXAttribute(path,state) {
+                let { inlineTransform = false } = state
+                let filename = state.file.opts.filename
+
                 if(inlineTransform) return
                 
               	let value
             	if(t.isJSXIdentifier(path.get('name')) && path.node.name.name === 'style') {
-                    insertTransformImportOnTop(path)
+                    insertTransformImportOnTop(path,filename)
                 	if(t.isJSXExpressionContainer((value = path.get('value')))) {
                       	let exp
                     	if(t.isObjectExpression((exp = value.get('expression')))) {
