@@ -105,22 +105,36 @@ module.exports = (babel) => {
         return result
     }
     
+    function getProgram(path) {
+        return path.findParent(p => 
+            t.isProgram(p)
+        )
+    }
+
+    function buildTransformImport() {
+        const addedImport = t.ImportDeclaration(
+            [t.ImportDefaultSpecifier(t.Identifier('__d_'))],
+            // 理论上来说,这个名字应该由用户配置更加方便扩展
+            t.StringLiteral('@tencent/babel-plugin-rnplus-px2rem/lib/transform')
+        );
+
+        return addedImport
+    }
+
+    function insertTransformImportAfterSSImport(path) {
+        if(!path.parentPath) throw new Error('path is not ImportSpecifier')
+        const addedImport = buildTransformImport()
+        const faPath = path.parentPath
+        faPath.insertAfter(addedImport)
+    }
+
     return {
         name: 'babel-plugin-rnplus-px2rem',
     	visitor: {
-          	Program(path) {
-            	const addedImport = t.ImportDeclaration(
-                    [t.ImportDefaultSpecifier(t.Identifier('__d_'))],
-                    // 理论上来说,这个名字应该由用户配置更加方便扩展
-                  	t.StringLiteral('@tencent/babel-plugin-rnplus-px2rem/lib/transform')
-                );
-
-                // enEffect(path,t)
-                path.node.body.unshift(addedImport);
-            },
             ImportSpecifier(path) {
                 if(path.node.imported.name === 'StyleSheet') {
-                  ssName = path.node.local.name           	
+                  ssName = path.node.local.name
+                  insertTransformImportAfterSSImport(path)         	
                 }
             },
           	JSXAttribute(path,{inlineTransform=false}) {
