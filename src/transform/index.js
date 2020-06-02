@@ -10,7 +10,9 @@ const NO_TRANSFORM_SET = Array.from([
     'perspective',
     'zIndex',
     'shadowOpacity',
-    'elevation'
+    'elevation',
+    'flexShrink',
+    'flexGrid'
 ]);
 
 /**
