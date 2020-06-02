@@ -8,7 +8,9 @@ const NO_TRANSFORM_SET = Array.from([
     'scaleY',
     'scale',
     'perspective',
-    'zIndex'
+    'zIndex',
+    'shadowOpacity',
+    'elevation'
 ]);
 
 /**
