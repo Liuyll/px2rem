@@ -28,6 +28,7 @@ let configs = {
 module.exports = (babel) => {
     const { types: t } = babel;
 
+    let isInsert = false
     let topPath
     let ssName 
     let customNoTransformSet
@@ -122,10 +123,22 @@ module.exports = (babel) => {
     }
 
     function insertTransformImportAfterSSImport(path) {
+        if(isInsert) return
         if(!path.parentPath) throw new Error('path is not ImportSpecifier')
         const addedImport = buildTransformImport()
         const faPath = path.parentPath
         faPath.insertAfter(addedImport)
+
+        isInsert = true
+    }
+
+    function insertTransformImportOnTop(path) {
+        if(isInsert) return
+        if(!topPath) topPath = getProgram(path)
+
+        topPath.node.body.unshift(buildTransformImport())
+        isInsert = true
+
     }
 
     return {
@@ -142,6 +155,7 @@ module.exports = (babel) => {
                 
               	let value
             	if(t.isJSXIdentifier(path.get('name')) && path.node.name.name === 'style') {
+                    insertTransformImportOnTop(path)
                 	if(t.isJSXExpressionContainer((value = path.get('value')))) {
                       	let exp
                     	if(t.isObjectExpression((exp = value.get('expression')))) {
@@ -173,7 +187,7 @@ module.exports = (babel) => {
 
                 transformUnit || (transformUnit = state.opts['unit'] ) || 1 / 37.5
 
-                topPath = path.findParent(path => t.isProgram(path))
+                topPath = getProgram(path)
 
                 if(!checkIsSS(path)) return 
                 let topScope = findVariableTopScope(path,ssName)
